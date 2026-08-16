@@ -1,3 +1,4 @@
+%%writefile device_info.cu
 #include <iostream>
 #include <cuda_runtime.h>
 

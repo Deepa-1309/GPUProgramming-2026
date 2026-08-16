@@ -1,3 +1,4 @@
+%%writefile barrier.cu
 #include <iostream>
 #include <cuda_runtime.h>
 
@@ -9,7 +10,7 @@ __device__ void customBarrier(int* arrived, int* released)
     // Each thread atomically records its arrival
     atomicAdd(arrived, 1);
 
-    // Make sure all threads have completed the atomic operation
+    // Synchronize all threads in the block
     __syncthreads();
 
     // Thread 0 releases the barrier after all threads arrive
@@ -21,7 +22,7 @@ __device__ void customBarrier(int* arrived, int* released)
         }
     }
 
-    // Make sure the release flag is visible to all threads
+    // Make sure all threads see the release
     __syncthreads();
 }
 
@@ -44,10 +45,10 @@ __global__ void barrierKernel()
 
     printf("Thread %d reached the barrier\n", tid);
 
-    // Execute custom barrier
+    // Custom barrier
     customBarrier(&arrived, &released);
 
-    // All threads reach here only after the barrier
+    // Code after the barrier
     if (released)
     {
         printf("Thread %d passed the barrier\n", tid);
@@ -73,7 +74,7 @@ int main()
         return 1;
     }
 
-    // Wait for the GPU to finish
+    // Wait for GPU to finish
     error = cudaDeviceSynchronize();
 
     if (error != cudaSuccess)
